@@ -49,3 +49,43 @@ BEGIN
 
     RETURN oldest_worker_id;
 END;
+
+CREATE OR REPLACE PROCEDURE SEED_DATA_WORKERS(
+    NB_WORKERS NUMBER, 
+    FACTORY_ID NUMBER
+) IS
+BEGIN
+    FOR i IN 1..NB_WORKERS LOOP
+        DECLARE
+            worker_id NUMBER;
+            start_date DATE;
+        BEGIN
+            start_date := DATE '2065-01-01' + DBMS_RANDOM.VALUE(0, 1826);
+
+            INSERT INTO workers_factory_1 (first_name, last_name, age, first_day, last_day, factory_id)
+            VALUES ('worker_f_' || workers_factory_1_seq.NEXTVAL, 'worker_l_' || workers_factory_1_seq.NEXTVAL, TRUNC(DBMS_RANDOM.VALUE(18, 65)), start_date, NULL, FACTORY_ID)
+            RETURNING id INTO worker_id;
+            
+            INSERT INTO workers_factory_2 (worker_id, first_name, last_name, start_date, end_date)
+            VALUES (worker_id, 'worker_f_' || worker_id, 'worker_l_' || worker_id, start_date, NULL);
+        END;
+    END LOOP;
+END;
+
+CREATE OR REPLACE PROCEDURE ADD_NEW_ROBOT(MODEL_NAME VARCHAR2) IS
+BEGIN
+    INSERT INTO robots (model)
+    VALUES (MODEL_NAME);
+    
+    COMMIT;
+END ADD_NEW_ROBOT;
+
+CREATE OR REPLACE PROCEDURE SEED_DATA_SPARE_PARTS(NB_SPARE_PARTS NUMBER) IS
+BEGIN
+    FOR i IN 1..NB_SPARE_PARTS LOOP
+        INSERT INTO spare_parts (name)
+        VALUES ('Spare Part ' || TO_CHAR(i));
+    END LOOP;
+
+    COMMIT;
+END SEED_DATA_SPARE_PARTS;
